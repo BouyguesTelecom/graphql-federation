@@ -2,6 +2,7 @@ import { GraphQLError } from 'graphql';
 import { SupergraphVisitorMap } from '../../composition/visitor.js';
 import { SupergraphState } from '../../state.js';
 import { SupergraphValidationContext } from '../validation-context.js';
+import { ObjectTypeFieldState } from '../../composition/object-type.js';
 
 export function InterfaceFieldNoImplementationRule(
   context: SupergraphValidationContext,
@@ -68,25 +69,20 @@ export function InterfaceFieldNoImplementationRule(
 
             // if not, make sure it implements the field
             // if (!objectFieldState?.byGraph.has(graph)) {
+            // FIXME: instead of throwing an error, add the missing fields to the object
             if (!objectFieldState) {
-              const interfaceFieldDefinedInGraphs = Array.from(
-                interfaceFieldState.byGraph.keys(),
-              ).map(context.graphIdToName);
-              const declaredIn =
-                interfaceFieldDefinedInGraphs.length === 1
-                  ? `subgraph "${interfaceFieldDefinedInGraphs[0]}"`
-                  : `subgraphs ${interfaceFieldDefinedInGraphs.map(g => `"${g}"`).join(', ')}`;
-
-              context.reportError(
-                new GraphQLError(
-                  `Interface field "${interfaceName}.${fieldName}" is declared in ${declaredIn} but type "${objectTypeState.name}", which implements "${interfaceName}" in subgraph "${context.graphIdToName(graph)}" does not have field "${fieldName}".`,
-                  {
-                    extensions: {
-                      code: 'INTERFACE_FIELD_NO_IMPLEM',
-                    },
-                  },
-                ),
-              );
+              const objectTypeStateFields = supergraph.objectTypes.get(objectTypeState.name)?.fields;
+              const interfaceTypeFields = supergraph.interfaceTypes.get(interfaceName)?.fields;
+              if (objectTypeStateFields && interfaceTypeFields) {
+                const mergedFields = new Map<string, ObjectTypeFieldState>([
+                  ...Array.from(objectTypeStateFields.entries()),
+                  ...Array.from(interfaceTypeFields.entries()).map<[string, ObjectTypeFieldState]>(([key, interfaceField]) => [
+                    key,
+                    interfaceField as unknown as ObjectTypeFieldState
+                  ])
+                ]);
+                supergraph.objectTypes.get(objectTypeState.name)!.fields = mergedFields;
+              }
             }
           }
         }
