@@ -12,6 +12,14 @@ const mapIRKindToString = {
   [TypeKind.DIRECTIVE]: 'Directive',
 };
 
+interface HasInterfaces {
+  interfaces: Set<string>;
+}
+
+function hasInterfaces(type: any): type is HasInterfaces {
+  return (type as HasInterfaces).interfaces !== undefined;
+}
+
 export type GraphTypeValidationContext = {
   graphName: string;
   isInterfaceObject: boolean;
@@ -66,26 +74,29 @@ export function TypesOfTheSameKindRule(context: SupergraphValidationContext) {
       continue;
     }
 
-    const groups = Array.from(kindToGraphs.entries()).map(([kind, graphs]) => {
-      const plural = graphs.size > 1 ? 's' : '';
-      return `${mapIRKindToString[kind]} Type in subgraph${plural} "${Array.from(graphs)
-        .map(typeValidationContext => typeValidationContext.graphName)
-        .join('", "')}"`;
-    });
-    const [first, second, ...rest] = groups;
-
-    context.reportError(
-      new GraphQLError(
-        `Type "${typeName}" has mismatched kind: it is defined as ${first} but ${second}${
-          rest.length ? ` and ${rest.join(' and ')}` : ''
-        }`,
-        {
-          extensions: {
-            code: 'TYPE_KIND_MISMATCH',
-          },
-        },
-      ),
-    );
+    /**
+     * If there is a conflit where an Object and an Interface have
+     * the same name, prefix the Interface with 'I_'
+     */
+    const iGraphs = kindToGraphs.get(TypeKind.INTERFACE);
+    if (iGraphs) {
+      const graphNames = Array.from(iGraphs).map(item => item.graphName);
+      for (const [_, state] of context.subgraphStates) {
+        if (graphNames.includes(state.graph.name)) {
+          const fieldFromState = state.types.get(typeName)
+          if (fieldFromState) {
+            state.types.set(`I_${typeName}`, fieldFromState);
+            state.types.delete(typeName);
+            state.types.forEach((value, key, map) => {
+              if (hasInterfaces(value) && value.interfaces.has(typeName)) {
+                  value.interfaces.add(`I_${typeName}`);
+                  value.interfaces.delete(typeName);
+              }
+            });
+          }
+        }
+      }
+    }
   }
 }
 
