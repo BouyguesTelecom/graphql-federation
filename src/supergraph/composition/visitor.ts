@@ -32,6 +32,14 @@ export function visitSupergraphState(
         }
       }
 
+      // FIXME: find a better way to solve this issue
+      for (const [_, val] of fieldState.args) {
+        val.type = val.type.replace('!','')
+        for (const [_, gValue] of val.byGraph) {
+          gValue.type = gValue.type.replace('!','')
+        }
+      }
+
       for (const argState of fieldState.args.values()) {
         for (const visitor of visitors) {
           if (visitor.ObjectTypeFieldArg) {
