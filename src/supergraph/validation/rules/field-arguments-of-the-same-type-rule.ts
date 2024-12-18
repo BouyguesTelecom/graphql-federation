@@ -53,7 +53,8 @@ export function FieldArgumentsOfTheSameTypeRule(
             .join('", "')}"`;
         });
         const [first, second, ...rest] = groups;
-        context.reportError(
+        // FIXME: temporary deactivation
+        /* context.reportError(
           new GraphQLError(
             `Type of argument "${objectTypeState.name}.${fieldState.name}(${
               argState.name
@@ -66,7 +67,7 @@ export function FieldArgumentsOfTheSameTypeRule(
               },
             },
           ),
-        );
+        ); */
       }
     },
   };

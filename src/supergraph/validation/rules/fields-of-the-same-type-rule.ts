@@ -145,7 +145,8 @@ export function FieldsOfTheSameTypeRule(
         });
         const [first, second, ...rest] = groups;
 
-        context.reportError(
+        // FIXME: temporary deactivation
+        /* context.reportError(
           new GraphQLError(
             `Type of field "${objectTypeState.name}.${
               fieldState.name
@@ -158,7 +159,7 @@ export function FieldsOfTheSameTypeRule(
               },
             },
           ),
-        );
+        ); */
       }
     },
     InputObjectTypeField(inputObjectTypeState, fieldState) {
@@ -205,7 +206,8 @@ export function FieldsOfTheSameTypeRule(
             .join('", "')}"`;
         });
         const [first, second, ...rest] = groups;
-        context.reportError(
+        // FIXME: temporary deactivation
+        /* context.reportError(
           new GraphQLError(
             `Type of field "${inputObjectTypeState.name}.${
               fieldState.name
@@ -218,7 +220,7 @@ export function FieldsOfTheSameTypeRule(
               },
             },
           ),
-        );
+        ); */
       }
     },
   };

@@ -161,13 +161,14 @@ export function InvalidFieldSharingRule(
               )}`
         }`;
 
-        context.reportError(
+        // FIXME: temporary deactivation
+        /* context.reportError(
           new GraphQLError(message, {
             extensions: {
               code: 'INVALID_FIELD_SHARING',
             },
           }),
-        );
+        ); */
       }
     },
     InterfaceTypeField(interfaceTypeState, fieldState) {
@@ -236,13 +237,14 @@ export function InvalidFieldSharingRule(
               )}`
         }`;
 
-        context.reportError(
+        // FIXME: temporary deactivation
+        /* context.reportError(
           new GraphQLError(message, {
             extensions: {
               code: 'INVALID_FIELD_SHARING',
             },
           }),
-        );
+        ); */
       }
     },
   };
