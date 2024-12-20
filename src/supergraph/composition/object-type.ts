@@ -273,9 +273,7 @@ export function objectTypeBuilder(): TypeBuilder<ObjectType, ObjectTypeState> {
         const interfaceState = supergraphState.interfaceTypes.get(interfaceName);
 
         if (!interfaceState) {
-          // FIXME: temporary deactivation
-          /* throw new Error(`Interface "${interfaceName}" not found in Supergraph state`); */
-          continue;
+          throw new Error(`Interface "${interfaceName}" not found in Supergraph state`);
         }
 
         for (const [interfaceFieldName, interfaceField] of interfaceState.fields) {
