@@ -14,6 +14,11 @@ export function InputObjectValuesRule(context: SupergraphValidationContext): Sup
         }
       }
       if (fieldsInCommon.length === 0) {
+        /**
+         * Instead of throwing an error when none of the fields of an input object
+         * type are consistently defined, we will add data to the 'byGraph' section
+         * of each field to ensure they are correctly defined.
+         */
         let baseValue;
         for (const [fieldKey, fieldValue] of inputObjectTypeState.fields) {
           baseValue = fieldValue.byGraph.values().next().value;

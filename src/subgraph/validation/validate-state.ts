@@ -585,6 +585,10 @@ function validateTypeImplementsInterface(
 
     // Assert interface field exists on type.
     if (typeField == null) {
+      /**
+       * Instead of throwing an error when an interface expects a field
+       * that an implementing object lacks, we will add this field to the object
+       */
       const fieldFromInterface = interfaceType.fields.get(fieldName);
       if (fieldFromInterface) {
         type.fields.set(fieldName, fieldFromInterface);
@@ -600,6 +604,11 @@ function validateTypeImplementsInterface(
     // Assert interface field type is satisfied by type field type, by being
     // a valid subtype. (covariant)
     if (!isTypeSubTypeOf(state, implementationsMap, typeField.type, ifaceField.type)) {
+      /**
+       * Instead of throwing an error when an interface expects a field
+       * that an implementing object implements incorrectly,we will
+       * override the object's field with the interface's field.
+       */
       const fieldFromInterface = interfaceType.fields.get(fieldName);
       if (fieldFromInterface) {
         type.fields.set(fieldName, fieldFromInterface);
