@@ -75,7 +75,7 @@ export function TypesOfTheSameKindRule(context: SupergraphValidationContext) {
     }
 
     /**
-     * If there is a conflit where an Object and an Interface have
+     * If there is a conflict where an Object and an Interface have
      * the same name, prefix the Interface with 'I_'
      */
     const iGraphs = kindToGraphs.get(TypeKind.INTERFACE);
