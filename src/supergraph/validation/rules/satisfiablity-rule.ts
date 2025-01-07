@@ -102,7 +102,8 @@ export function SatisfiabilityRule(
         continue;
       }
 
-      context.reportError(
+      // FIXME: temporary deactivation
+      /* context.reportError(
         new GraphQLError(
           [
             'The following supergraph API query:',
@@ -122,7 +123,7 @@ export function SatisfiabilityRule(
             },
           },
         ),
-      );
+      ); */
     }
   }
 

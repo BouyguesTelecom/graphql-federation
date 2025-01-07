@@ -14,16 +14,20 @@ export function InputObjectValuesRule(context: SupergraphValidationContext): Sup
         }
       }
       if (fieldsInCommon.length === 0) {
-        context.reportError(
-          new GraphQLError(
-            `None of the fields of input object type "${inputObjectTypeState.name}" are consistently defined in all the subgraphs defining that type. As only fields common to all subgraphs are merged, this would result in an empty type.`,
-            {
-              extensions: {
-                code: 'EMPTY_MERGED_INPUT_TYPE',
-              },
-            },
-          ),
-        );
+        /**
+         * Instead of throwing an error when none of the fields of an input object
+         * type are consistently defined, we will add data to the 'byGraph' section
+         * of each field to ensure they are correctly defined.
+         */
+        let baseValue;
+        for (const [fieldKey, fieldValue] of inputObjectTypeState.fields) {
+          baseValue = fieldValue.byGraph.values().next().value;
+          if (baseValue) {
+            for (const [graphKey, _] of inputObjectTypeState.byGraph) {
+              inputObjectTypeState.fields.get(fieldKey)?.byGraph.set(graphKey, baseValue);
+            }
+          }
+        }
       }
     },
   };

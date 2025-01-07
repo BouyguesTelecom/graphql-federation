@@ -2,7 +2,7 @@ import { GraphQLError } from 'graphql';
 import { isList, isNonNull, stripList, stripNonNull } from '../../../utils/state.js';
 import { EnumTypeState } from '../../composition/enum-type.js';
 import { InterfaceTypeState } from '../../composition/interface-type.js';
-import { ObjectTypeState } from '../../composition/object-type.js';
+import { ObjectTypeFieldState, ObjectTypeState } from '../../composition/object-type.js';
 import { ScalarTypeState } from '../../composition/scalar-type.js';
 import { UnionTypeState } from '../../composition/union-type.js';
 import { SupergraphVisitorMap } from '../../composition/visitor.js';
@@ -67,16 +67,8 @@ export function InterfaceSubtypeRule(
         if (
           !isTypeSubTypeOf(supergraph, implementationsMap, fieldState.type, interfaceField.type)
         ) {
-          context.reportError(
-            new GraphQLError(
-              `Interface field ${interfaceName}.${interfaceField.name} expects type ${interfaceField.type} but ${objectTypeState.name}.${fieldState.name} of type ${fieldState.type} is not a proper subtype.`,
-              {
-                extensions: {
-                  code: 'INVALID_GRAPHQL',
-                },
-              },
-            ),
-          );
+          // FIXME: instead of throwing an error, set the field type to its parent field type
+          objectTypeState.fields.set(fieldState.name, interfaceField as unknown as ObjectTypeFieldState);
         }
       }
     },

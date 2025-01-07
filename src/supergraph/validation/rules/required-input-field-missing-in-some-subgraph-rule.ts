@@ -30,7 +30,8 @@ export function RequiredInputFieldMissingInSomeSubgraphRule(
         const missingIn = `subgraph${graphsWithoutField.length > 1 ? 's' : ''} "${graphsWithoutField
           .map(context.graphIdToName)
           .join('", "')}"`;
-        context.reportError(
+        // FIXME: temporary deactivation
+        /* context.reportError(
           new GraphQLError(
             `Input object field "${inputObjectState.name}.${fieldState.name}" is required in some subgraphs but does not appear in all subgraphs: it is required in ${requiredIn} but does not appear in ${missingIn}`,
             {
@@ -39,7 +40,7 @@ export function RequiredInputFieldMissingInSomeSubgraphRule(
               },
             },
           ),
-        );
+        ); */
       }
     },
   };

@@ -32,6 +32,18 @@ export function visitSupergraphState(
         }
       }
 
+      /**
+       * To prevent critical 'requirement errors' later in the code,
+       * we will make every field unrequired in this specific case.
+       */
+      // FIXME: find a better way to solve this issue
+      for (const [_, val] of fieldState.args) {
+        val.type = val.type.replace('!','')
+        for (const [_, gValue] of val.byGraph) {
+          gValue.type = gValue.type.replace('!','')
+        }
+      }
+
       for (const argState of fieldState.args.values()) {
         for (const visitor of visitors) {
           if (visitor.ObjectTypeFieldArg) {

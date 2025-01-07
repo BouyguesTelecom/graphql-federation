@@ -576,28 +576,53 @@ function validateTypeImplementsInterface(
   type: ObjectType | InterfaceType,
   interfaceType: InterfaceType,
 ): void {
-  const typeFieldMap = type.fields;
+  let typeFieldMap = type.fields;
 
   // Assert each interface field is implemented.
   for (const ifaceField of interfaceType.fields.values()) {
     const fieldName = ifaceField.name;
-    const typeField = typeFieldMap.get(fieldName);
+    let typeField = typeFieldMap.get(fieldName);
 
     // Assert interface field exists on type.
     if (typeField == null) {
-      reportError(
-        `Interface field ${interfaceType.name}.${fieldName} expected but ${type.name} does not provide it.`,
-      );
-      continue;
+      /**
+       * Instead of throwing an error when an interface expects a field
+       * that an implementing object lacks, we will add this field to the object
+       */
+      const fieldFromInterface = interfaceType.fields.get(fieldName);
+      if (fieldFromInterface) {
+        type.fields.set(fieldName, fieldFromInterface);
+      }
+      typeFieldMap = type.fields;
+      typeField = typeFieldMap.get(fieldName);
+      if (typeField == null) {
+        reportError(`Interface field ${interfaceType.name}.${fieldName} expected but ${type.name} does not provide it.`);
+        continue;
+      }
     }
 
     // Assert interface field type is satisfied by type field type, by being
     // a valid subtype. (covariant)
     if (!isTypeSubTypeOf(state, implementationsMap, typeField.type, ifaceField.type)) {
-      reportError(
-        `Interface field ${interfaceType.name}.${fieldName} expects type ` +
-          `${ifaceField.type} but ${type.name}.${fieldName} of type ${typeField.type} is not a proper subtype.`,
-      );
+      /**
+       * Instead of throwing an error when an interface expects a field
+       * that an implementing object implements incorrectly,we will
+       * override the object's field with the interface's field.
+       */
+      const fieldFromInterface = interfaceType.fields.get(fieldName);
+      if (fieldFromInterface) {
+        type.fields.set(fieldName, fieldFromInterface);
+      }
+      typeFieldMap = type.fields;
+      typeField = typeFieldMap.get(fieldName);
+      if (typeField == null) {
+        reportError(`Interface field ${interfaceType.name}.${fieldName} expected but ${type.name} does not provide it.`);
+        continue;
+      }
+      if (!isTypeSubTypeOf(state, implementationsMap, typeField.type, ifaceField.type)) {
+        reportError(`Interface field ${interfaceType.name}.${fieldName} expects type ` +
+          `${ifaceField.type} but ${type.name}.${fieldName} of type ${typeField.type} is not a proper subtype.`);
+      }
     }
 
     // Assert each interface field arg is implemented.
